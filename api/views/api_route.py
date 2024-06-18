@@ -1,31 +1,28 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import request, jsonify
+from api import api
+from api.Controllers import TodoController
 
-
-@app.route("/")
+todo_controller = TodoController()
+@api.route("/", methods=["GET"])
 def index():
-    todo_list = Todo.query.all()
-    return render_template("index.html", tasks=todo_list)
+    return todo_controller.search()
 
-@app.route("/add", methods=["POST"])
-def add():
-    name = request.form.get("name")
-    desc = request.form.get("desc")
-    new_todo = Todo(name=name, desc=desc)
-    db.session.add(new_todo)
-    db.session.commit()
-    return redirect(url_for("index"))
+@api.route("/<int:id>", methods=["GET"])
+def getById(id):
+    return todo_controller.getById(id)
 
-@app.route("/update/<int:todo_id>", methods=["POST"])
-def update(todo_id):
-    todo = Todo.query.filter_by(id=todo_id).first()
-    todo.name = request.form.get("name")
-    todo.desc = request.form.get("desc")
-    db.session.commit()
-    return redirect(url_for("index"))
+@api.route("/create",methods=["POST"])
+def create():
+    return todo_controller.create()
 
-@app.route("/delete/<int:todo_id>")
-def delete(todo_id):
-    todo = Todo.query.filter_by(id=todo_id).first()
-    db.session.delete(todo)
-    db.session.commit()
-    return redirect(url_for("index"))
+@api.route("/update/<int:id>", methods=["PUT"])
+def update(id):
+    return todo_controller.update(id)
+
+@api.route("/delete/<int:id>", methods=["DELETE"])
+def delete(id):
+    return todo_controller.delete(id)
+
+@api.route("/tri", methods=["GET"])
+def all():
+    return todo_controller.all()
